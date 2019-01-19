@@ -1,9 +1,10 @@
 FROM node
 MAINTAINER medineshkatwal@gmail.com
 
-WORKDIR /project
 
-COPY project .
+COPY . myapp/
+
+WORKDIR myapp/
 
 EXPOSE 3000
 
