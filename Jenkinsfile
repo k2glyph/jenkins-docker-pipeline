@@ -1,16 +1,41 @@
 pipeline {
-  agent {
-      dockerfile true
+  environment {
+    registry = "medineshkatwal/jenkins-docker-pipeline"
+    registryCredential = 'dockerhub'
+    dockerImage = ''
   }
+  agent any
+  tools {nodejs "node" }
   stages {
-    stage('setup') {
-        steps {
-            sh 'env'
-        }
-    }
-    stage('Stage1') {
+    stage('Cloning Git') {
       steps {
-        echo 'Hello World!'
+        git 'https://github.com/gustavoapolinario/node-todo-frontend'
+      }
+    } 
+    stage('Install Dependency') {
+       steps {
+         sh 'npm install'
+       }
+    }
+     stage('Building image') {
+      steps{
+        script {
+          dockerImage = docker.build registry + ":$BUILD_NUMBER"
+        }
+      }
+    }
+     stage('Deploy Image') {
+      steps{
+         script {
+            docker.withRegistry( '', registryCredential ) {
+            dockerImage.push()
+          }
+        }
+      }
+    }
+    stage('Remove Unused docker image') {
+      steps{
+        sh "docker rmi $registry:$BUILD_NUMBER"
       }
     }
   }
