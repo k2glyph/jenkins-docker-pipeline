@@ -5,11 +5,11 @@ pipeline {
     dockerImage = ''
   }
   agent any
-  tools {nodejs "node" }
+  tools { nodejs "nodejs" }
   stages {
     stage('Cloning Git') {
       steps {
-        git 'https://github.com/gustavoapolinario/node-todo-frontend'
+        git 'https://github.com/k2glyph/jenkins-docker-pipeline.git'
       }
     } 
     stage('Install Dependency') {
@@ -17,15 +17,15 @@ pipeline {
          sh 'npm install'
        }
     }
-     stage('Building image') {
+     stage('Build image') {
       steps{
         script {
           dockerImage = docker.build registry + ":$BUILD_NUMBER"
         }
       }
     }
-     stage('Deploy Image') {
-      steps{
+     stage('Push Image to Registry') {
+      steps {
          script {
             docker.withRegistry( '', registryCredential ) {
             dockerImage.push()
@@ -33,7 +33,7 @@ pipeline {
         }
       }
     }
-    stage('Remove Unused docker image') {
+    stage('Remove Unused image') {
       steps{
         sh "docker rmi $registry:$BUILD_NUMBER"
       }
